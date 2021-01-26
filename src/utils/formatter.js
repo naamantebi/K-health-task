@@ -1,18 +1,26 @@
 export function createCols(headers) {
-    return headers.map( item => {
-        return {id: item.header_id, name: item.header_name}
+    let cols = [];
+    if (headers) {
+        cols = headers.map(item => {
+            return {id: item.header_id, name: item.header_name}
         });
+    }
+    return cols;
 }
 
 
 export function createRows(values) {
-    const rows = values.reduce((acc, item) => {
-        if (acc[item.row_id]) {
-            acc[item.row_id][item.header_id] = item.value
-        } else {
-            acc[item.row_id] = {isEditMode: false, id: item.row_id, [item.header_id]: item.value}
-        }
-        return acc
-    }, {});
-    return Object.values(rows)
+    let rows = [];
+    if (values) {
+        const newRows = values.reduce((acc, item) => {
+            if (acc[item.row_id]) {
+                acc[item.row_id][item.header_id] = item.value
+            } else {
+                acc[item.row_id] = {isEditMode: false, id: item.row_id, [item.header_id]: item.value}
+            }
+            return acc
+        }, {});
+        rows = Object.values(newRows)
+    }
+    return rows;
 }

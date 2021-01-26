@@ -1,8 +1,8 @@
 import gql from 'graphql-tag';
 
 export const Graph = () => {
-  return {
-    GetInfo: gql`{
+    return {
+        getInfo: gql`{
   headers {
     header_id
     header_name
@@ -17,12 +17,12 @@ export const Graph = () => {
   }
 }
   `,
-    updateValue: gql`
+        updateValue: gql`
   mutation Update($header_id: Int!, $value: String!, $row_id: Int!) {
     update(header_id: $header_id, value: $value, row_id: $row_id) {
       value
     }
   }
 `
-  };
+    };
 };

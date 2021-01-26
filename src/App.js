@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, {useMemo, useState} from 'react';
 import { makeStyles, Paper, Table, TableBody, TableCell, TableRow } from '@material-ui/core';
 import TableHead from '@material-ui/core/TableHead';
 import { CustomTableCell } from './component/CustomTableCell';
 import { EditTableCell } from './component/EditTableCell';
 import { useMutation, useQuery } from '@apollo/client';
 import { createCols, createRows } from './utils/formatter';
-import { mockData } from './utils/mockData';
+import {Graph} from "./services/graph.service";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -20,16 +20,21 @@ const useStyles = makeStyles(theme => ({
 
 
 export default function App() {
-  const graphService = Graph();
-  const {data, loading, error} = useQuery(graphService.GetInfo);
-  const [update, {res}] = useMutation(graphService.updateValue);
-  const {headers, values} = data ? data : mockData;
-  const [cols, setCols] = useState(createCols(headers));
-  const [rows, setRows] = useState(createRows(values));
-
+  const classes = useStyles();
   const [previous, setPrevious] = useState(null);
   const [toUpdate, setToUpdate] = useState({});
-  const classes = useStyles();
+  const graphService = Graph();
+  const [update, res] = useMutation(graphService.updateValue);
+  const [cols, setCols] = useState([]);
+  const [rows, setRows] = useState([]);
+  const {data, loading, error} = useQuery(graphService.getInfo);
+  useMemo(() => {
+    if (data) {
+      const {headers, values} = data;
+      setCols(createCols(headers));
+      setRows(createRows(values));
+    }
+  }, [data]);
 
   if (loading) return <p>Loading...</p>;
   if (error) console.log(error);
@@ -49,6 +54,7 @@ export default function App() {
     const newRows = rows.map(row => changedRow.id === row.id ? {...row, [name]: value} : row);
     setRows(newRows);
   };
+
   const onToggleEditMode = id => {
     const updatedRows = rows.map(row => row.id === id ? {
       ...row,
@@ -56,7 +62,6 @@ export default function App() {
     } : row);
     setRows(updatedRows);
   };
-
 
   const clearSetToUpdate = (id) => setToUpdate({
     ...toUpdate,
@@ -100,8 +105,7 @@ export default function App() {
             <TableRow key={row.id}>
               <EditTableCell {...{onRevert, onToggleEditMode, onDone, row}}/>
               {cols.map(col =>
-                <CustomTableCell key={`${col.id}+${row.id}`} row={row} name={col.id}
-                                 onChange={onChange}/>
+                <CustomTableCell key={`${col.id}+${row.id}`} row={row} name={col.id} onChange={onChange}/>
               )}
             </TableRow>
           )}
